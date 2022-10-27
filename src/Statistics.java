@@ -11,7 +11,7 @@ public class Statistics {
      * @throws NumberFormatException wenn ein String nicht konvertiert werden kann, nichtnumerische Zeichen enthält
      * siehe Integer.parseInt
      */
-    public static int[] convertToIntArray(String[] arr) throws NumberFormatException {
+    public static int[] convertStringToIntArray(String[] arr) throws NumberFormatException {
         int[] integerArray = new int[arr.length];
         for (int i = 0; i < arr.length; i++)
             integerArray[i] = Integer.parseInt(arr[i]);
@@ -40,7 +40,7 @@ public class Statistics {
      * @param integerArray - Array von allen Zahlen, aus denen der Durchschnitt berechnet werden soll
      * @return den Mittelwert aller Zahlen des Eingabearrays
      */
-    public static double calcMittelwert(int[] integerArray) {
+    public static double calcAverage(int[] integerArray) {
         return calcSum(integerArray)/(double)integerArray.length;
     }
 
@@ -62,26 +62,28 @@ public class Statistics {
      * Berechnet die Standardabweichung mithilfe der Varianz (siehe calcVarianz).
      *
      * @param valueCountMap Map aus allen verschiedenen Werten mit ihrer jeweiligen Anzahl an Vorkommen
-     * @param mittelwert Mittelwert aller Werte, aus denen die Standardabweichung berechnet werden soll
+     * @param average Mittelwert aller Werte, aus denen die Standardabweichung berechnet werden soll
      * @param size Anzahl aller Werte, auch doppelte (Summe aller CountWerte der valueCountMap)
      * @return die Standardabweichung
      */
-    public static double calcStandardabweichung(HashMap<Integer, Integer> valueCountMap, double mittelwert, int size) {
-        return Math.sqrt(calcVarianz(valueCountMap, mittelwert, size));
+    public static double calcStandardDeviation(HashMap<Integer, Integer> valueCountMap, double average, int size) {
+        return Math.sqrt(calcVariance(valueCountMap, average, size));
     }
 
     /**
      * Berechnet die Varianz.
      *
      * @param valueCountMap Map aus allen verschiedenen Werten mit ihrer jeweiligen Anzahl an Vorkommen
-     * @param mittelwert Mittelwert aller Werte, aus denen die Standardabweichung berechnet werden soll
+     * @param average Mittelwert aller Werte, aus denen die Standardabweichung berechnet werden soll
      * @param size Anzahl aller Werte, auch doppelte (Summe aller CountWerte der valueCountMap)
      * @return die Varianz
      */
-    public static double calcVarianz(HashMap<Integer, Integer> valueCountMap, double mittelwert, int size) {
+    public static double calcVariance(HashMap<Integer, Integer> valueCountMap, double average, int size) {
         double varianz = 0;
         for (Map.Entry<Integer, Integer> entry : valueCountMap.entrySet()) {
-            varianz += Math.pow(entry.getKey() - mittelwert, 2) * (entry.getValue() / ((double)size - 1));
+            int value = entry.getKey();
+            int count = entry.getValue();
+            varianz += (value - average) * (value - average) * (count / ((double)size - 1));
         }
         return varianz;
     }
@@ -91,9 +93,11 @@ public class Statistics {
      *
      * @param valueCountMap Map aus allen verschiedenen Werten mit ihrer jeweiligen Anzahl an Vorkommen
      */
-    public static void printHistogramm(HashMap<Integer, Integer> valueCountMap) {
+    public static void printHistogram(HashMap<Integer, Integer> valueCountMap) {
         for (Map.Entry<Integer, Integer> entry : valueCountMap.entrySet()) {
-            System.out.println(entry.getKey() + ": " + "*".repeat(entry.getValue()));
+            int value = entry.getKey();
+            int count = entry.getValue();
+            System.out.println(value + ": " + "*".repeat(count));
         }
     }
 
@@ -105,7 +109,7 @@ public class Statistics {
 
         int[] integerArray;
         try {
-            integerArray = convertToIntArray(args);
+            integerArray = convertStringToIntArray(args);
         } catch (NumberFormatException e) {
             System.out.println("No valid input! Input must be numbers.\nMaybe values are too big!");
             return;
@@ -113,18 +117,18 @@ public class Statistics {
 
         // enthält jeden verschiedenen vorkommenden Wert mit seiner Anzahl an Vorkommen
         HashMap<Integer, Integer> valueCountMap = intArrayToMap(integerArray);
-        double mittelwert = calcMittelwert(integerArray);
-        int summe = calcSum(integerArray);
-        double standardabweichung = calcStandardabweichung(valueCountMap, mittelwert, integerArray.length);
-        double varianz = calcVarianz(valueCountMap, calcMittelwert(integerArray), integerArray.length);
+        double average = calcAverage(integerArray);
+        int sum = calcSum(integerArray);
+        double standardDeviation = calcStandardDeviation(valueCountMap, average, integerArray.length);
+        double variance = calcVariance(valueCountMap, calcAverage(integerArray), integerArray.length);
 
-        System.out.println("Mittelwert: " + mittelwert);
-        System.out.println("Summe: " + summe);
-        System.out.println("Standardabweichung: " + standardabweichung);
-        System.out.println("Varianz: " + varianz);
+        System.out.println("Mittelwert: " + average);
+        System.out.println("Summe: " + sum);
+        System.out.println("Standardabweichung: " + standardDeviation);
+        System.out.println("Varianz: " + variance);
         System.out.println();
 
-        printHistogramm(valueCountMap);
+        printHistogram(valueCountMap);
     }
 
 }
